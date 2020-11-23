@@ -15,6 +15,9 @@ module clb(
   output x,
   output y);
 
+  // connections for shift register
+  reg[9:0] shift_reg;
+
   wire lut0_a, lut0_b, lut0_c, f;
   lut3 lut0(
     .shift_clk(shift_clk),
@@ -58,9 +61,40 @@ module clb(
     .q(q));
 
   // logic to generate flop_clk/set/rst
+  mux3 clk_mux(
+    .sel(shift_reg[1:0]),
+    .a(g),
+    .b(c),
+    .c(k),
+    .mux_out(flop_clk));  
+ 
+  mux3 set_mux(
+    .sel(shift_reg[1:0]),
+    .a(a),
+    .b(f),
+    .c(0),
+    .mux_out(flop_set));
 
-  // logic to generate x/y
+  mux3 rst_mux(
+    .sel(shift_reg[1:0]),
+    .a(d),
+    .b(g),
+    .c(0),
+    .mux_out(flop_rst));
 
-  // connections for shift register
+  // logic to generate x/y 
+  mux3 x_mux(
+    .sel(shift_reg[1:0]),
+    .a(f),
+    .b(g),
+    .c(q),
+    .mux_out(x));
+
+  mux3 y_mux(
+    .sel(shift_reg[1:0]),
+    .a(q),
+    .b(g),
+    .c(f),
+    .mux_out(y));
 
 endmodule
