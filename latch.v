@@ -7,11 +7,11 @@ module latch(
   input  rst,
 
   input  d,
-  output q_latch
+  output q_latch,
   output p_latch
    );
 
-   assign q_latch = (latch_hold ? p_latch : !d);
-   assign p_latch = !((q_latch | set) & !reset);
+   assign q_latch = (latch_level ? !d : p_latch);
+   assign p_latch = !((q_latch | set) & !rst);
 
 endmodule

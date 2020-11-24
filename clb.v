@@ -33,7 +33,7 @@ module clb(
   // logic to generate lut0_a/b/c
 
   wire lut1_a, lut1_b, lut1_c, g;
-  lut3 lut0(
+  lut3 lut1(
     .shift_clk(shift_clk),
     .shift_en(shift_en),
     .shift_i(),

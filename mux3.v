@@ -15,6 +15,7 @@ module mux3(
       2'b01: mux_out = b;
       2'b10: mux_out = c;
       default: mux_out = 1'bZ;  
+    endcase
   end
 
 endmodule
