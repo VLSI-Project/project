@@ -52,7 +52,7 @@ module test_lut3();
       for(i = 0; i < 8; i=i+1) begin
         {a,b,c} = i;
         #5;
-        if(y != val[i]) begin
+        if(y !== val[i]) begin
           $display("Test failed: bits=%8b, abc=%3b, y=%b (expected y=%b)", val, i, y, val[i]);
           $finish;
         end
