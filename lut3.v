@@ -4,7 +4,7 @@ module lut3(
 
    input shift_clk, 
    input shift_en, 
-   input [8:0] bitstream, //passed in a bitstream, each bit will be an output 
+   input [7:0] bitstream, //passed in a bitstream, each bit will be an output 
    output reg shift_o, 
    
    input a, 
