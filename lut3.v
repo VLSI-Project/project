@@ -5,26 +5,38 @@ module lut3(
    input shift_clk, 
    input shift_en, 
    input shift_i, 
-   output reg shift_o, 
+   output shift_o, 
    
    input a, 
    input b, 
    input c, 
    output reg y); 
    
-   reg [7:0] store; 
+   reg [7:0] store; //create a store register to hold the shifted inputs 
    integer i; 
-   //assign the output based on the select lines 
+   
+   
+   //store the values in the register
    always @(posedge shift_clk) begin 
    
-   if (shift_en) begin //if shift is enabled
+   if(shift_en) begin   //if the shift is enabled 
+     
+     for (i = 0; i < 8;) begin  //go through 8 bits of the store register
+   
+        if (shift_clk)begin     //at every clock cycle,store the shift_i bits into the register, and increment the count
+           store[i] = shift_i; 
+           i = i + 1;     //increment the array count only if there is a value stored in it. 
+        end 
+      end
+   
+   end 
+   
+   end 
    
    
-   for (i = 0; i < 8; i = i + 1) begin  //assign store to shift_i
    
-      store[i] = shift_i;
-      
-   end
+   //get the output based on the select lines 
+   always @(posedge shift_clk) begin
    
    case(a & b & c)   //implement a 8:1 mux to get the output 
    
@@ -39,15 +51,10 @@ module lut3(
    
    default: y = 1'bx; 
    endcase 
-  
-   end //end for if clause 
-   else begin 
-   
-      y = 0; 
-   end //else 
+ 
    
    
-   end //always block
+   end //2nd always block
    
    
-endmodule 
+endmodule
