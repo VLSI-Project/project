@@ -28,7 +28,7 @@ module lut3(
            i = i + 1;     //increment the array count only if there is a value stored in it. 
         end 
       end
-   
+      shift_o = store[7]; 
    end 
    
    end 
