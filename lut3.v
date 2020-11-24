@@ -4,7 +4,7 @@ module lut3(
 
    input shift_clk, 
    input shift_en, 
-   input [7:0] bitstream, //passed in a bitstream, each bit will be an output 
+   input shift_i, 
    output reg shift_o, 
    
    input a, 
@@ -12,32 +12,34 @@ module lut3(
    input c, 
    output reg y); 
    
+   reg [7:0] store; 
    integer i; 
    //assign the output based on the select lines 
    always @(posedge shift_clk) begin 
    
-   if (shift_en) begin //if shift is enabled, go through bitstream
+   if (shift_en) begin //if shift is enabled
    
    
-   for (i = 0; i < 8; i = i + 1) begin  //go through the bitstream and assign each bit, to shift_o
+   for (i = 0; i < 8; i = i + 1) begin  //assign store to shift_i
    
-   shift_o = bitstream[i]; 
+      store[i] = shift_i;
+      
+   end
    
    case(a & b & c)   //implement a 8:1 mux to get the output 
    
-   3'b000: y = shift_o; 
-   3'b001: y = shift_o;
-   3'b010: y = shift_o;
-   3'b011: y = shift_o;
-   3'b100: y = shift_o;
-   3'b101: y = shift_o;
-   3'b110: y = shift_o;
-   3'b111: y = shift_o;
+      3'b000: y = store[0]; 
+      3'b001: y = store[1];
+      3'b010: y = store[2];
+      3'b011: y = store[3];
+      3'b100: y = store[4];
+      3'b101: y = store[5];
+      3'b110: y = store[6];
+      3'b111: y = store[7];
    
-   default: y = 0; 
+   default: y = 1'bx; 
    endcase 
-   
-   end //end for loop
+  
    end //end for if clause 
    else begin 
    
