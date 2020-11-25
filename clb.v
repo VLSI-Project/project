@@ -18,7 +18,7 @@ module clb(
   // connections for shift register
   reg[9:0] shift_reg;
 
-  wire lut0_a, lut0_b, lut0_c, f;
+  wire lut0_a, lut0_b, lut0_c, l0_f, l1_g;
   lut3 lut0(
     .shift_clk(shift_clk),
     .shift_en(shift_en),
@@ -28,11 +28,30 @@ module clb(
     .a(lut0_a),
     .b(lut0_b),
     .c(lut0_c),
-    .y(f));
+    .y(l0_f));
 
   // logic to generate lut0_a/b/c
+  mux2 lut0_a_mux(
+    .sel(),
+    .a(a),
+    .b(b),
+    .mux_out(lut0_a)); 
 
-  wire lut1_a, lut1_b, lut1_c, g;
+  mux2 lut0_b_mux(
+    .sel(),
+    .a(b),
+    .b(c),
+    .mux_out(lut0_b)); 
+
+  mux3 lut0_c_mux(
+    .sel(),
+    .a(c),
+    .b(d),
+    .c(q),
+    .mux_out(lut0_c));
+  //
+
+  wire lut1_a, lut1_b, lut1_c, l1_g;
   lut3 lut1(
     .shift_clk(shift_clk),
     .shift_en(shift_en),
@@ -42,11 +61,52 @@ module clb(
     .a(lut1_a),
     .b(lut1_b),
     .c(lut1_c),
-    .y(g));  
+    .y(l1_g));  
 
   // logic to generate lut1_a/b/c
+  // Input Muxes
+  mux2 lut1_a_mux(
+    .sel(),
+    .a(a),
+    .b(b),
+    .mux_out(lut1_a)); 
 
-  wire flop_clk, flop_set, flop_rst, q;
+  mux2 lut1_b_mux(
+    .sel(),
+    .a(b),
+    .b(c),
+    .mux_out(lut1_b)); 
+
+  mux3 lut1_c_mux(
+    .sel(),
+    .a(c),
+    .b(d),
+    .c(q),
+    .mux_out(lut1_c));
+  
+  wire dynamic_out, f, g;
+  // Output muxes
+  mux2 dynamic_b_mux(
+    .sel(b),
+    .a(l0_f),
+    .b(l1_g),
+    .mux_out(dynamic_out)); 
+
+  mux2 f_mux(
+    .sel(),
+    .a(l0_f),
+    .b(dynamic_out),
+    .mux_out(f));
+ 
+  mux2 lut1_a_mux(
+    .sel(),
+    .a(l1_g),
+    .b(dynamic_out),
+    .mux_out(g)); 
+  //
+
+
+  wire clk_s1_out, flop_clk, flop_set, flop_rst, q;
   flop flop(
     .shift_clk(shift_clk),
     .shift_en(shift_en),
@@ -61,13 +121,20 @@ module clb(
     .q(q));
 
   // logic to generate flop_clk/set/rst
-  mux3 clk_mux(
+  mux3 clk_mux_s1(
     .sel(shift_reg[1:0]),
     .a(g),
     .b(c),
     .c(k),
-    .mux_out(flop_clk));  
+    .mux_out(clk_s1_out));  
  
+  mux3 clk_mux_s2(
+    .sel(shift_reg[1:0]),
+    .a(!clk_s1_out),
+    .b(clk_s1_out),
+    .c(0),
+    .mux_out(flop_clk));  
+
   mux3 set_mux(
     .sel(shift_reg[1:0]),
     .a(a),
