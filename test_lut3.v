@@ -3,7 +3,6 @@
 module test_lut3();
 
   reg shift_clk;
-  reg shift_en;
   reg shift_i;
   reg a;
   reg b;
@@ -12,7 +11,6 @@ module test_lut3();
   wire y;
   lut3 lut3(
     .shift_clk(shift_clk),
-    .shift_en(shift_en),
     .shift_i(shift_i),
     .shift_o(shift_o),
 
@@ -36,10 +34,8 @@ module test_lut3();
     input [7:0] val);
     integer i;
     begin
-      shift_en = 1;
       for(i = 7; i >= 0; i=i-1)
         shift_bit(val[i]);
-      shift_en = 0;
     end
   endtask
 

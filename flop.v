@@ -3,7 +3,6 @@
 // neg or pos edge D flip-flop or latch with async set/reset
 module flop(
   input  shift_clk,
-  input  shift_en,
   input  shift_i,
   output shift_o,
 

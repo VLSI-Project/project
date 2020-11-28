@@ -9,7 +9,6 @@
 // configurable logic block
 module clb(
   input  shift_clk,
-  input  shift_en,
   input  shift_i,
   output shift_o,
 
@@ -27,10 +26,8 @@ module clb(
   wire flop_to_lut0, lut0_to_lut1;
 
   always @(posedge shift_clk) begin
-    if (shift_en) begin
-      shift_reg_out = shift_reg[`CONFIG_LEN-1];
-      shift_reg = ((shift_reg << 1) | shift_i);       
-    end
+    shift_reg_out = shift_reg[`CONFIG_LEN-1];
+    shift_reg = ((shift_reg << 1) | shift_i);       
   end
 
   // LUTs
@@ -39,7 +36,6 @@ module clb(
   wire lut0_a, lut0_b, lut0_c, l0_f;
   lut3 lut0(
     .shift_clk(shift_clk),
-    .shift_en(shift_en),
     .shift_i(flop_to_lut0),
     .shift_o(lut0_to_lut1),
 
@@ -72,7 +68,6 @@ module clb(
   wire lut1_a, lut1_b, lut1_c, l1_g;
   lut3 lut1(
     .shift_clk(shift_clk),
-    .shift_en(shift_en),
     .shift_i(lut0_to_lut1),
     .shift_o(shift_o),
 
@@ -127,7 +122,6 @@ module clb(
   wire clk_s1_out, flop_clk, flop_set, flop_rst;
   flop flop(
     .shift_clk(shift_clk),
-    .shift_en(shift_en),
     .shift_i(shift_reg_out),
     .shift_o(flop_to_lut0),
 

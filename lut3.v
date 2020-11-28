@@ -3,7 +3,6 @@
 module lut3(
 
    input shift_clk, 
-   input shift_en, 
    input shift_i, 
    output reg shift_o, 
    
@@ -22,10 +21,8 @@ module lut3(
 
    sel [2:0] = {a,b,c}; //for the case statement later 
    
-   if(shift_en) begin   //if the shift is enabled 
-     
-     //store each bit, only getting the first bit 
-     if (shift_clk) begin //only on the posedge of clk
+   //store each bit, only getting the first bit 
+   if (shift_clk) begin //only on the posedge of clk
      store[7] = store[6];
      store[6] = store[5];
      store[5] = store[4];
@@ -34,11 +31,9 @@ module lut3(
      store[2] = store[1];
      store[1] = store[0];
      store[0] = shift_i; 
-     end 
+   end 
      
-     shift_o = store[7];
-      
-   end   
+   shift_o = store[7];
    
    case(sel)   //implement a 8:1 mux to get the output 
    
