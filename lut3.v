@@ -16,7 +16,7 @@ module lut3(
    reg [2:0] sel; 
    
    //store the values in the register
-   always @(*) begin 
+   always @(posedge shift_clk) begin 
    
 
    sel [2:0] = {a,b,c}; //for the case statement later 
