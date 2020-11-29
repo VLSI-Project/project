@@ -17,10 +17,7 @@ module lut3(
    
    //store the values in the register
    always @(posedge shift_clk) begin 
-   
-
-   sel [2:0] = {a,b,c}; //for the case statement later 
-   
+ 
    //store each bit, only getting the first bit 
    if (shift_clk) begin //only on the posedge of clk
      store[7] = store[6];
@@ -34,6 +31,14 @@ module lut3(
    end 
      
    shift_o = store[7];
+   
+   
+   end 
+   
+   
+   always @(*) begin
+   
+   sel [2:0] = {a,b,c}; //for the case statement later 
    
    case(sel)   //implement a 8:1 mux to get the output 
    
@@ -51,8 +56,6 @@ module lut3(
    
    end 
    
-   
-
-   
+ 
    
 endmodule
