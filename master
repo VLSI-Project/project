@@ -1,0 +1,1 @@
+-v lib1 clb.v mux2.v mux3.v flop.v latch.v lut3.v test_clb.v

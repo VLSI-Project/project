@@ -1,0 +1,8 @@
+`define CLB_CONFIG_LEN 20
+`define LUT_CONFIG_LEN 8
+
+`define AND_CFG 8'b00000001
+`define OR_CFG  8'b01111111
+`define XOR_CFG 8'b01010101
+`define XNOR_CFG  8'b10101010
+`define MAJ_CFG 8'b00010111 

@@ -34,4 +34,5 @@ module flop(
       .p_latch(sec_p)
   );
 
+  assign shift_o = shift_i;
 endmodule
