@@ -17,9 +17,7 @@ module lut3(
    
    //store the values in the register
    always @(posedge shift_clk) begin 
- 
    //store each bit, only getting the first bit 
-   if (shift_clk) begin //only on the posedge of clk
      store[7] = store[6];
      store[6] = store[5];
      store[5] = store[4];
@@ -28,7 +26,6 @@ module lut3(
      store[2] = store[1];
      store[1] = store[0];
      store[0] = shift_i; 
-   end 
      
    shift_o = store[7];
    

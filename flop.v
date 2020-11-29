@@ -13,6 +13,7 @@ module flop(
   input  d,
   output q);
 
+  reg disable_ff;
   wire prim_p, prim_q;
   wire sec_p;
 
