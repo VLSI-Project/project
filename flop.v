@@ -17,6 +17,7 @@ module flop(
   wire prim_p, prim_q;
   wire sec_p;
 
+  /* TODO: Fix reset during configuration! */
   latch primary_latch(
       .latch_level(flop_clk),
       .set(set),

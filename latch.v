@@ -11,7 +11,7 @@ module latch(
   output p_latch
    );
 
-   assign q_latch = (latch_level ? !d : p_latch);
+   assign q_latch = (latch_level ? !d : !p_latch);
    assign p_latch = !((q_latch | set) & !rst);
 
 endmodule

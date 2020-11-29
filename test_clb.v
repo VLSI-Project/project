@@ -71,6 +71,7 @@ module test_clb;
     /* Two 3-var test:
      *  AND(A,B,C) on 'x' and XOR(B C D) on 'y' 
      *  */
+    $display("XOR/AND test:");
     test({1'b0, 3'b000, 3'b111, 1'b0, 8'b00000000, 2'b00, 2'b10, `AND3_CFG, `XOR3_CFG},
         {16'b1100000000000000},
         {`XOR3_REV_CFG, `XOR3_REV_CFG});
@@ -78,6 +79,7 @@ module test_clb;
     /* Dynamic selection, 4-var test:
      * MAJ(A,B,C,D) on x,y : 1 if at least 2 1's asserted
      */ 
+    $display("\nMAJ4 test");
     test({1'b0, 3'b011, 3'b011, 1'b1, 8'b00000000, 2'b10, 2'b01, `MAJ3_CFG, `MAJ3_CFG_B},
         {16'b1111111011101000},
         {16'b1111111011101000});
