@@ -27,18 +27,14 @@ module clb(
 
   // connections for shift register
   reg[`CLB_CONFIG_LEN-1:0] shift_reg;
-  reg shift_reg_out; // Connects to first submodule (flop)
+  wire shift_reg_out; // Connects to first submodule (flop)
   reg init;
 
-  initial begin
-    shift_reg = `CLB_CONFIG_LEN'bZ;
-  end
-
   always @(posedge shift_clk) begin
-    shift_reg_out = shift_reg[`CLB_CONFIG_LEN-1];
     shift_reg = ((shift_reg << 1) | shift_i);       
   end
 
+  assign shift_reg_out = shift_reg[`CLB_CONFIG_LEN-1];
 
   // Mux for D and Q 
   mux2 dq_mux(
@@ -156,23 +152,23 @@ module clb(
  
   mux3 clk_mux_s2(
     .sel(shift_reg[11:10]),
-    .a(!clk_s1_out),
-    .b(clk_s1_out),
-    .c(1'b0),
+    .a(1'b0),
+    .b(!clk_s1_out),
+    .c(clk_s1_out),
     .mux_out(flop_clk));  
 
   mux3 set_mux(
     .sel(shift_reg[13:12]),
-    .a(a),
-    .b(f),
-    .c(1'b0),
+    .a(1'b0),
+    .b(a),
+    .c(f),
     .mux_out(flop_set));
 
   mux3 rst_mux(
     .sel(shift_reg[15:14]),
-    .a(d),
-    .b(g),
-    .c(1'b0),
+    .a(1'b0),
+    .b(d),
+    .c(g),
     .mux_out(flop_rst));
 
   // logic to generate x/y 

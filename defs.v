@@ -5,4 +5,6 @@
 `define OR_CFG  8'b01111111
 `define XOR_CFG 8'b01010101
 `define XNOR_CFG  8'b10101010
-`define MAJ_CFG 8'b00010111 
+`define MAJ_CFG 8'b00010111
+
+`define XOR_REV_CFG 8'b10101010
