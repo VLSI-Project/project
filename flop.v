@@ -28,7 +28,7 @@ module flop(
   );
 
   latch secondary_latch(
-      .latch_level(flop_clk),
+      .latch_level(!flop_clk),
       .set(set),
       .rst(rst),
       .d(prim_p),
