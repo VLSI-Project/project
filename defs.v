@@ -1,4 +1,4 @@
-`define CLB_CONFIG_LEN 20
+`define CLB_CONFIG_LEN 22
 `define LUT_CONFIG_LEN 8
 
 `define AND3_CFG 8'b00000001

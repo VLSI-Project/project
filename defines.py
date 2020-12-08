@@ -1,3 +1,4 @@
+# unidirectional
 CLB_PIP_A = [
     (19,-7,"X","x_top"),
     (19,-12,"LONG","long_row"),
@@ -6,6 +7,7 @@ CLB_PIP_A = [
     (19,-30,"ROW2","gen_row_right[2]"),
     (19,-36,"ROW3","gen_row_right[3]")
 ]
+# unidirectional
 CLB_PIP_B = [
     (-7,14,"X","x_top"),
     (-12,14,"GLOBAL","global_"),
@@ -18,6 +20,7 @@ CLB_PIP_B = [
     (-50,14,"COL1","gen_col_bot[1]"),
     (-55,14,"COL0","gen_col_bot[0]")
 ]
+# unidirectional
 CLB_PIP_C = [
     (-7,22,"X","x_bot"),
     (-17,22,"LONG1","long_col[1]"),
@@ -28,6 +31,7 @@ CLB_PIP_C = [
     (-50,22,"COL1","gen_col_bot[1]"),
     (-55,22,"COL0","gen_col_bot[0]")
 ]
+# unidirectional
 CLB_PIP_D = [
     (11,51,"X","clb_x"),
     (11,58,"ROW3","gen_row_right[3]"),
@@ -36,29 +40,33 @@ CLB_PIP_D = [
     (11,74,"ROW0","gen_row_right[0]"),
     (11,82,"LONG","long_row")
 ]
+# unidirectional
 CLB_PIP_K = [
     (-12,30,"GLOBAL","global_"),
     (-17,30,"LONG1","long_col[1]")
 ]
+# unidirectional
 CLB_PIP_X = [
     (43,3,"COL1","gen_col_bot[1]"),
     (53,3,"COL3","gen_col_bot[3]"),
     (71,3,"LONG0","long_col[0]")
 ]
+# unidirectional
 CLB_PIP_Y = [
     (37,35,"COL0","gen_col_bot[0]"),
     (48,35,"COL2","gen_col_bot[2]"),
     (61,35,"COL4","gen_col_bot[4]"),
     (76,35,"LONG1","long_col[1]")
 ]
+# bidirectional
 SWITCH_PIP = [
-    (1,25,"COL0_LONG","gen_col_bot[0]","long_row"),
-    (17,25,"COL3_LONG","gen_col_bot[3]","long_row"),
-    (25,-1,"COL4HI_COL4LO","gen_col_top[4]","gen_col_bot[4]"),
-    (25,7,"COL4HI_ROW2","gen_col_top[4]","gen_row_right[2]"),
-    (25,12,"COL4HI_ROW1","gen_col_top[4]","gen_row_right[1]"),
-    (30,7,"COL4LO_ROW2","gen_col_bot[4]","gen_row_right[2]"),
-    (30,12,"COL4LO_ROW1","gen_col_bot[4]","gen_row_right[1]"),
+    (1,25,"COL0_LONG","long_row","gen_col_bot[0]"),
+    (17,25,"COL3_LONG","long_row","gen_col_bot[3]"),
+    (25,-1,"COL4HI_COL4LO","gen_col_bot[4]","gen_col_top[4]"),
+    (25,7,"COL4HI_ROW2","gen_row_right[2]","gen_col_top[4]"),
+    (25,12,"COL4HI_ROW1","gen_row_right[1]","gen_col_top[4]"),
+    (30,7,"COL4LO_ROW2","gen_row_right[2]","gen_col_bot[4]"),
+    (30,12,"COL4LO_ROW1","gen_row_right[1]","gen_col_bot[4]"),
     (35,7,"ROW2_LONG0","gen_row_right[2]","long_col[0]"),
     (35,17,"ROW0_LONG0","gen_row_right[0]","long_col[0]"),
     (40,1,"ROW3_LONG1","gen_row_right[3]","long_col[1]"),
@@ -130,6 +138,7 @@ BOT_IOB = [
     (747,864,"P42"),
     (778,864,"P43")
 ]
+# unidirectional
 IOB_LEFT_TOP_PIP = [
     (20,14,"TS_LONG2","long_col[2]","iob_ts_top"),
     (25,14,"TS_COL0","gen_col_top[0]","iob_ts_top"),
@@ -147,6 +156,7 @@ IOB_LEFT_TOP_PIP = [
     (77,37,"OUT_ROW2","gen_row_right[2]","iob_out_top"),
     (77,48,"OUT_ROW0","gen_row_right[0]","iob_out_top")
 ]
+# unidirectional
 IOB_LEFT_BOT_PIP = [
     (20,14,"TS_LONG2","long_col[2]","iob_ts_mid"),
     (25,14,"TS_COL0","gen_col_bot[0]","iob_ts_mid"),
@@ -164,6 +174,7 @@ IOB_LEFT_BOT_PIP = [
     (72,-4,"OUT_ROW1","gen_row_right[1]","iob_out_mid"),
     (72,-15,"OUT_ROW3","gen_row_right[3]","iob_out_mid")
 ]
+# unidirectional
 CLB_LEFT_PIP_B = [
     (-7,14,"X","x_top"),
     (-12,14,"IOB","iob_in_bot"),
@@ -176,6 +187,7 @@ CLB_LEFT_PIP_B = [
     (-69,14,"COL0","gen_col_bot[0]"),
     (-74,14,"LONG2","long_col[2]")
 ]
+# unidirectional
 CLB_LEFT_PIP_C = [
     (-7,22,"X","x_bot"),
     (-40,22,"LONG1","long_col[1]"),
@@ -186,19 +198,22 @@ CLB_LEFT_PIP_C = [
     (-69,22,"COL0","gen_col_bot[0]"),
     (-74,22,"LONG2","long_col[2]")
 ]
+# unidirectional
 CLB_LEFT_PIP_K = [
     (-35,30,"GLOBAL","global_"),
     (-40,30,"LONG1","long_col[1]")
 ]
+# bidirectional
 SWITCH_LEFT_PIP = [
-    (-4,25,"LONG2_LONG","long_col[2]","long_row"),
-    (1,25,"COL0_LONG","gen_col_bot[0]","long_row"),
-    (17,25,"COL3_LONG","gen_col_bot[3]","long_row"),
-    (24,25,"LONG0_LONG","long_col[0]","long_row"),
-    (30,25,"LONG1_LONG","long_col[1]","long_row"),
-    (24,1,"LONG0_ROW3","long_col[0]","gen_row_right[3]"),
-    (30,7,"LONG1_ROW2","long_col[1]","gen_row_right[2]")
+    (-4,25,"LONG2_LONG","long_row","long_col[2]"),
+    (1,25,"COL0_LONG","long_row","gen_col_bot[0]"),
+    (17,25,"COL3_LONG","long_row","gen_col_bot[3]"),
+    (24,25,"LONG0_LONG","long_row","long_col[0]"),
+    (30,25,"LONG1_LONG","long_row","long_col[1]"),
+    (24,1,"LONG0_ROW3","gen_row_right[3]","long_col[0]"),
+    (30,7,"LONG1_ROW2","gen_row_right[2]","long_col[1]")
 ]
+# unidirectional
 IOB_TOP_LEFT_PIP = [
     (19,24,"TS_LONG2","long_row[1]","iob_ts_mid"),
     (19,30,"TS_ROW3","gen_row_right[3]","iob_ts_mid"),
@@ -218,6 +233,7 @@ IOB_TOP_LEFT_PIP = [
     (-30,69,"OUT_COL2","gen_col_bot[2]","iob_out_mid"),
     (-41,69,"OUT_COL0","gen_col_bot[0]","iob_out_mid")
 ]
+# unidirectional
 IOB_TOP_RIGHT_PIP = [
     (14,24,"TS_LONG2","long_row[1]","iob_ts_right"),
     (14,30,"TS_ROW3","gen_row_right[3]","iob_ts_right"),
@@ -238,6 +254,7 @@ IOB_TOP_RIGHT_PIP = [
     (46,64,"OUT_COL4","gen_col_bot[4]","iob_out_left"),
     (61,64,"OUT_LONG1","long_col[1]","iob_out_left")
 ]
+# unidirectional
 CLB_TOP_PIP_A = [
     (12,-17,"IOB","iob_in_mid"),
     (12,-28,"LONG","long_row[0]"),
@@ -247,19 +264,21 @@ CLB_TOP_PIP_A = [
     (12,-51,"ROW3","gen_row_right[3]"),
     (12,-57,"LONG2","long_row[1]")
 ]
+# bidirectional
 SWITCH_TOP_PIP = [
-    (1,24,"COL0_LONG","gen_col_bot[0]","long_row[0]"),
-    (16,24,"COL3_LONG","gen_col_bot[3]","long_row[0]"),
+    (1,24,"COL0_LONG","long_row[0]","gen_col_bot[0]"),
+    (16,24,"COL3_LONG","long_row[0]","gen_col_bot[3]"),
     (24,6,"ROW2_COL4","gen_row_right[2]","gen_col_bot[4]"),
     (24,11,"ROW1_COL4","gen_row_right[1]","gen_col_bot[4]"),
-    (34,24,"LONG0_LONG","long_col[0]","long_row[0]"),
-    (34,16,"LONG0_ROW0","long_col[0]","gen_row_right[0]"),
-    (34,6,"LONG0_ROW2","long_col[0]","gen_row_right[2]"),
-    (34,-5,"LONG0_LONG2","long_col[0]","long_row[1]"),
-    (40,24,"LONG1_LONG","long_col[1]","long_row[0]"),
-    (40,11,"LONG1_ROW1","long_col[1]","gen_row_right[1]"),
-    (40,1,"LONG1_ROW3","long_col[1]","gen_row_right[3]")
+    (34,24,"LONG0_LONG","long_row[0]","long_col[0]"),
+    (34,16,"LONG0_ROW0","gen_row_right[0]","long_col[0]"),
+    (34,6,"LONG0_ROW2","gen_row_right[2]","long_col[0]"),
+    (34,-5,"LONG0_LONG2","long_row[1]","long_col[0]"),
+    (40,24,"LONG1_LONG","long_row[0]","long_col[1]"),
+    (40,11,"LONG1_ROW1","gen_row_right[1]","long_col[1]"),
+    (40,1,"LONG1_ROW3","gen_row_right[3]","long_col[1]")
 ]
+# unidirectional
 IOB_RIGHT_TOP_PIP = [
     (-7,14,"TS_LONG2","long_col[2]","iob_ts_top"),
     (-12,14,"TS_COL3","gen_col_top[3]","iob_ts_top"),
@@ -278,6 +297,7 @@ IOB_RIGHT_TOP_PIP = [
     (-56,43,"OUT_ROW1","gen_row_left[1]","iob_out_top"),
     (-56,56,"OUT_LONG","long_row","iob_out_top")
 ]
+# unidirectional
 IOB_RIGHT_BOT_PIP = [
     (-7,14,"TS_LONG2","long_col[2]","iob_ts_mid"),
     (-12,14,"TS_COL3","gen_col_bot[3]","iob_ts_mid"),
@@ -296,6 +316,7 @@ IOB_RIGHT_BOT_PIP = [
     (-51,1,"OUT_ROW0","gen_row_left[0]","iob_out_mid"),
     (-51,-9,"OUT_ROW2","gen_row_left[2]","iob_out_mid")
 ]
+# unidirectional
 CLB_RIGHT_PIP_X = [
     (40,14,"OUTLO","iob_out_bot"),
     (45,14,"OUTHI","iob_out_mid"),
@@ -303,6 +324,7 @@ CLB_RIGHT_PIP_X = [
     (73,14,"COL1","gen_col_bot[1]"),
     (84,14,"COL3","gen_col_bot[3]")
 ]
+# unidirectional
 CLB_RIGHT_PIP_Y = [
     (40,35,"OUTLO","iob_out_bot"),
     (45,35,"OUTHI","iob_out_mid"),
@@ -311,17 +333,19 @@ CLB_RIGHT_PIP_Y = [
     (79,35,"COL2","gen_col_bot[2]"),
     (89,35,"LONG2","long_col[2]")
 ]
+# bidirectional
 SWITCH_RIGHT_PIP = [
     (22,25,"LONG_LONG2","long_row","long_col[2]"),
     (17,25,"LONG_COL3","long_row","gen_col_bot[3]"),
     (1,25,"LONG_COL0","long_row","gen_col_bot[0]"),
     (-7,25,"LONG_LONG1","long_row","long_col[1]"),
-    (-12,25,"LONG0_LONG","long_col[0]","long_row"),
-    (-12,17,"LONG0_ROW0","long_col[0]","gen_row_left[0]"),
-    (-12,7,"LONG0_ROW2","long_col[0]","gen_row_left[2]"),
-    (-7,12,"LONG1_ROW1","long_col[1]","gen_row_left[1]"),
-    (-7,1,"LONG1_ROW3","long_col[1]","gen_row_left[3]")
+    (-12,25,"LONG0_LONG","long_row","long_col[0]"),
+    (-12,17,"LONG0_ROW0","gen_row_left[0]","long_col[0]"),
+    (-12,7,"LONG0_ROW2","gen_row_left[2]","long_col[0]"),
+    (-7,12,"LONG1_ROW1","gen_row_left[1]","long_col[1]"),
+    (-7,1,"LONG1_ROW3","gen_row_left[3]","long_col[1]")
 ]
+# unidirectional
 IOB_BOT_LEFT_PIP = [
     (19,-14,"TS_LONG2","long_row[1]","iob_ts_mid"),
     (19,-19,"TS_ROW0","gen_row_right[0]","iob_ts_mid"),
@@ -341,6 +365,7 @@ IOB_BOT_LEFT_PIP = [
     (-30,-58,"OUT_COL2","gen_col_top[2]","iob_out_mid"),
     (-40,-58,"OUT_COL0","gen_col_top[0]","iob_out_mid")
 ]
+# unidirectional
 IOB_BOT_RIGHT_PIP = [
     (15,-14,"TS_LONG2","long_row[1]","iob_ts_right"),
     (15,-19,"TS_ROW0","gen_row_right[0]","iob_ts_right"),
@@ -361,6 +386,7 @@ IOB_BOT_RIGHT_PIP = [
     (46,-53,"OUT_COL4","gen_col_top[4]","iob_out_left"),
     (62,-53,"OUT_LONG1","long_col[1]","iob_out_left")
 ]
+# unidirectional
 CLB_BOT_PIP_D = [
     (12,51,"IOB","iob_in_mid"),
     (12,66,"LONG","long_row[0]"),
@@ -370,20 +396,22 @@ CLB_BOT_PIP_D = [
     (12,90,"ROW0","gen_row_right[0]"),
     (12,95,"LONG2","long_row[1]")
 ]
+# bidirectional
 SWITCH_BOT_PIP = [
     (1,-7,"LONG_COL0","long_row[0]","gen_col_top[0]"),
     (16,-7,"LONG_COL3","long_row[0]","gen_col_top[3]"),
-    (34,-7,"LONG0_LONG","long_col[0]","long_row[0]"),
-    (34,1,"LONG0_ROW3","long_col[0]","gen_row_right[3]"),
-    (34,12,"LONG0_ROW1","long_col[0]","gen_row_right[1]"),
-    (34,22,"LONG0_LONG2","long_col[0]","long_row[1]"),
-    (40,-7,"LONG1_LONG","long_col[1]","long_row[0]"),
-    (40,6,"LONG1_ROW2","long_col[1]","gen_row_right[2]"),
-    (40,17,"LONG1_ROW0","long_col[1]","gen_row_right[0]"),
-    (40,30,"LONG1_ALT","long_col[1]","alt"),
-    (24,6,"COL4_ROW2","gen_col_top[4]","gen_row_right[2]"),
-    (24,12,"COL4_ROW1","gen_col_top[4]","gen_row_right[1]")
+    (34,-7,"LONG0_LONG","long_row[0]","long_col[0]"),
+    (34,1,"LONG0_ROW3","gen_row_right[3]","long_col[0]"),
+    (34,12,"LONG0_ROW1","gen_row_right[1]","long_col[0]"),
+    (34,22,"LONG0_LONG2","long_row[1]","long_col[0]"),
+    (40,-7,"LONG1_LONG","long_row[0]","long_col[1]"),
+    (40,6,"LONG1_ROW2","gen_row_right[2]","long_col[1]"),
+    (40,17,"LONG1_ROW0","gen_row_right[0]","long_col[1]"),
+    (40,30,"LONG1_ALT","alt","long_col[1]"),
+    (24,6,"COL4_ROW2","gen_row_right[2]","gen_col_top[4]"),
+    (24,12,"COL4_ROW1","gen_row_right[1]","gen_col_top[4]")
 ]
+# unidirectional
 IOB_P9_PIP = [
     (20,24,"TS_LONG2_ROW","long_row[1]","iob_ts_mid"),
     (20,30,"TS_ROW3","gen_row_right[3]","iob_ts_mid"),
@@ -405,20 +433,22 @@ IOB_P9_PIP = [
     (-48,58,"OUT_COL0","gen_col_bot[0]","iob_out_mid"),
     (-53,58,"OUT_LONG2_COL","long_col[2]","iob_out_mid")
 ]
+# bidirectional
 TOP_LEFT_CORNER_PIP = [
-    (33,40,"LONG2_COL_LONG2_ROW","long_col[2]","long_row[1]"),
-    (33,46,"LONG2_COL_ROW3","long_col[2]","gen_row_right[3]"),
+    (33,40,"LONG2_COL_LONG2_ROW","long_row[1]","long_col[2]"),
+    (33,46,"LONG2_COL_ROW3","gen_row_right[3]","long_col[2]"),
     (38,40,"LONG2_ROW_COL0","long_row[1]","gen_col_bot[0]"),
-    (38,46,"COL0_ROW3","gen_col_bot[0]","gen_row_right[3]"),
-    (43,51,"COL1_ROW2","gen_col_bot[1]","gen_row_right[2]"),
-    (48,56,"COL2_ROW1","gen_col_bot[2]","gen_row_right[1]"),
-    (53,61,"COL3_ROW0","gen_col_bot[3]","gen_row_right[0]"),
-    (53,69,"COL3_LONG","gen_col_bot[3]","long_row[0]"),
-    (61,69,"LONG0_LONG","long_col[0]","long_row[0]"),
-    (66,69,"LONG1_LONG","long_col[1]","long_row[0]"),
-    (67,56,"LONG1_ROW1","long_col[1]","gen_row_right[1]"),
-    (61,41,"LONG0_LONG2_ROW","long_col[0]","long_row[1]")
+    (38,46,"COL0_ROW3","gen_row_right[3]","gen_col_bot[0]"),
+    (43,51,"COL1_ROW2","gen_row_right[2]","gen_col_bot[1]"),
+    (48,56,"COL2_ROW1","gen_row_right[1]","gen_col_bot[2]"),
+    (53,61,"COL3_ROW0","gen_row_right[0]","gen_col_bot[3]"),
+    (53,69,"COL3_LONG","long_row[0]","gen_col_bot[3]"),
+    (61,69,"LONG0_LONG","long_row[0]","long_col[0]"),
+    (66,69,"LONG1_LONG","long_row[0]","long_col[1]"),
+    (67,56,"LONG1_ROW1","gen_row_right[1]","long_col[1]"),
+    (61,41,"LONG0_LONG2_ROW","long_row[1]","long_col[0]")
 ]
+# unidirectional
 GLOBALIN_PIP = [
     (48,90,"COL2","gen_col_bot[2]"),
     (61,90,"LONG0","long_col[0]"),
@@ -427,6 +457,7 @@ GLOBALIN_PIP = [
     (90,95,"P9","iob_in_mid"),
     (90,142,"P11","iob_in_bot")
 ]
+# unidirectional
 IOB_P61_PIP = [
     (14,24,"TS_LONG2_ROW","long_row[1]","iob_ts_right"),
     (14,30,"TS_ROW3","gen_row_left[3]","iob_ts_right"),
@@ -448,13 +479,14 @@ IOB_P61_PIP = [
     (64,69,"OUT_COL2","gen_col_bot[2]","iob_out_left"),
     (74,69,"OUT_LONG2_COL","long_col[2]","iob_out_left")
 ]
+# bidirectional
 TOP_RIGHT_CORNER_PIP = [
-    (808,35,"IOCLK_TOP_GLOBAL","ioclk_top","global_"),
-    (808,46,"IOCLK_TOP_ROW3","ioclk_top","gen_row_left[3]"),
-    (808,51,"IOCLK_TOP_ROW2","ioclk_top","gen_row_left[2]"),
-    (808,56,"IOCLK_TOP_ROW1","ioclk_top","gen_row_left[1]"),
-    (808,61,"IOCLK_TOP_ROW0","ioclk_top","gen_row_left[0]"),
-    (808,69,"IOCLK_TOP_LONG","ioclk_top","long_row[0]"),
+    (808,35,"IOCLK_TOP_GLOBAL","global_","ioclk_top"),
+    (808,46,"IOCLK_TOP_ROW3","gen_row_left[3]","ioclk_top"),
+    (808,51,"IOCLK_TOP_ROW2","gen_row_left[2]","ioclk_top"),
+    (808,56,"IOCLK_TOP_ROW1","gen_row_left[1]","ioclk_top"),
+    (808,61,"IOCLK_TOP_ROW0","gen_row_left[0]","ioclk_top"),
+    (808,69,"IOCLK_TOP_LONG","long_row[0]","ioclk_top"),
     (813,74,"IOCLK_RIGHT_GLOBAL","ioclk_right","global_"),
     (824,74,"IOCLK_RIGHT_LONG1","ioclk_right","long_col[1]"),
     (831,74,"IOCLK_RIGHT_COL0","ioclk_right","gen_col_bot[0]"),
@@ -467,10 +499,11 @@ TOP_RIGHT_CORNER_PIP = [
     (837,56,"ROW1_COL1","gen_row_left[1]","gen_col_bot[1]"),
     (842,51,"ROW2_COL2","gen_row_left[2]","gen_col_bot[2]"),
     (847,46,"ROW3_COL3","gen_row_left[3]","gen_col_bot[3]"),
-    (847,40,"COL3_LONG2_ROW","gen_col_bot[3]","long_row[1]"),
+    (847,40,"COL3_LONG2_ROW","long_row[1]","gen_col_bot[3]"),
     (852,40,"LONG2_ROW_LONG2_COL","long_row[1]","long_col[2]"),
     (852,46,"ROW3_LONG2_COL","gen_row_left[3]","long_col[2]")
 ]
+# unidirectional
 IOB_P43_PIP = [
     (14,-14,"TS_LONG2_ROW","long_row[1]","iob_ts_right"),
     (14,-19,"TS_ROW0","gen_row_left[0]","iob_ts_right"),
@@ -493,6 +526,7 @@ IOB_P43_PIP = [
     (69,-58,"OUT_COL3","gen_col_top[3]","iob_out_left"),
     (74,-58,"OUT_LONG2_COL","long_col[2]","iob_out_left")
 ]
+# bidirectional
 BOT_RIGHT_CORNER_PIP = [
     (818,821,"LONG_LONG0","long_row[0]","long_col[0]"),
     (824,821,"LONG_LONG1","long_row[0]","long_col[1]"),
@@ -500,10 +534,11 @@ BOT_RIGHT_CORNER_PIP = [
     (837,834,"ROW2_COL1","gen_row_left[2]","gen_col_top[1]"),
     (842,840,"ROW1_COL2","gen_row_left[1]","gen_col_top[2]"),
     (847,845,"ROW0_COL3","gen_row_left[0]","gen_col_top[3]"),
-    (847,850,"COL3_LONG2_ROW","gen_col_top[3]","long_row[1]"),
+    (847,850,"COL3_LONG2_ROW","long_row[1]","gen_col_top[3]"),
     (852,850,"LONG2_ROW_LONG2_COL","long_row[1]","long_col[2]"),
     (852,845,"ROW0_LONG2_COL","gen_row_left[0]","long_col[2]")
 ]
+# unidirectional
 ALTIN_PIP = [
     (808,848,"INTOSC","intosc"),
     (797,834,"ROW2","gen_row_left[2]"),
@@ -513,6 +548,7 @@ ALTIN_PIP = [
     (824,816,"LONG1","long_col[1]"),
     (837,816,"COL1","gen_col_top[1]")
 ]
+# unidirectional
 IOB_P27_PIP = [
     (20,-14,"TS_LONG2_ROW","long_row[1]","iob_ts_mid"),
     (20,-19,"TS_ROW0","gen_row_right[0]","iob_ts_mid"),
@@ -533,6 +569,7 @@ IOB_P27_PIP = [
     (-48,-58,"OUT_COL0","gen_col_top[0]","iob_out_mid"),
     (-53,-58,"OUT_LONG2_COL","long_col[2]","iob_out_mid")
 ]
+# bidirectional
 BOT_LEFT_CORNER_PIP = [
     (72,795,"IOCLK_LEFT_GLOBAL","ioclk_left","global_"),
     (61,795,"IOCLK_LEFT_LONG0","ioclk_left","long_col[0]"),
@@ -540,22 +577,64 @@ BOT_LEFT_CORNER_PIP = [
     (48,795,"IOCLK_LEFT_COL2","ioclk_left","gen_col_top[2]"),
     (43,795,"IOCLK_LEFT_COL1","ioclk_left","gen_col_top[1]"),
     (38,795,"IOCLK_LEFT_COL0","ioclk_left","gen_col_top[0]"),
-    (77,816,"IOCLK_BOT_GLOBAL","ioclk_bot","global_"),
-    (77,821,"IOCLK_BOT_LONG","ioclk_bot","long_row[0]"),
-    (77,829,"IOCLK_BOT_ROW3","ioclk_bot","gen_row_right[3]"),
-    (77,834,"IOCLK_BOT_ROW2","ioclk_bot","gen_row_right[2]"),
-    (77,840,"IOCLK_BOT_ROW1","ioclk_bot","gen_row_right[1]"),
-    (77,845,"IOCLK_BOT_ROW0","ioclk_bot","gen_row_right[0]"),
+    (77,816,"IOCLK_BOT_GLOBAL","global_","ioclk_bot"),
+    (77,821,"IOCLK_BOT_LONG","long_row[0]","ioclk_bot"),
+    (77,829,"IOCLK_BOT_ROW3","gen_row_right[3]","ioclk_bot"),
+    (77,834,"IOCLK_BOT_ROW2","gen_row_right[2]","ioclk_bot"),
+    (77,840,"IOCLK_BOT_ROW1","gen_row_right[1]","ioclk_bot"),
+    (77,845,"IOCLK_BOT_ROW0","gen_row_right[0]","ioclk_bot"),
     (54,821,"LONG_COL3","long_row[0]","gen_col_top[3]"),
     (61,821,"LONG_LONG0","long_row[0]","long_col[0]"),
     (67,821,"LONG_LONG1","long_row[0]","long_col[1]"),
-    (67,834,"LONG1_ROW2","long_col[1]","gen_row_right[2]"),
-    (62,850,"LONG0_LONG2_ROW","long_col[0]","long_row[1]"),
+    (67,834,"LONG1_ROW2","gen_row_right[2]","long_col[1]"),
+    (62,850,"LONG0_LONG2_ROW","long_row[1]","long_col[0]"),
     (54,829,"ROW3_COL3","gen_row_right[3]","gen_col_top[3]"),
     (48,834,"ROW2_COL2","gen_row_right[2]","gen_col_top[2]"),
     (43,840,"ROW1_COL1","gen_row_right[1]","gen_col_top[1]"),
     (38,845,"ROW0_COL0","gen_row_right[0]","gen_col_top[0]"),
     (33,845,"ROW0_LONG2_COL","gen_row_right[0]","long_col[2]"),
     (33,850,"LONG2_ROW_LONG2_COL","long_row[1]","long_col[2]"),
-    (38,850,"COL0_LONG2_ROW","gen_col_top[0]","long_row[1]")
+    (38,850,"COL0_LONG2_ROW","long_row[1]","gen_col_top[0]")
+]
+SWITCH_CONNS = [
+    "1_3",
+    "1_5",
+    "1_6",
+    "1_7",
+    "1_8",
+    "2_3",
+    "2_4",
+    "2_5",
+    "2_6",
+    "2_8",
+    "3_1",
+    "3_2",
+    "3_5",
+    "3_7",
+    "3_8",
+    "4_2",
+    "4_5",
+    "4_6",
+    "4_7",
+    "4_8",
+    "5_1",
+    "5_2",
+    "5_3",
+    "5_4",
+    "5_7",
+    "6_1",
+    "6_2",
+    "6_4",
+    "6_7",
+    "6_8",
+    "7_1",
+    "7_3",
+    "7_4",
+    "7_5",
+    "7_6",
+    "8_1",
+    "8_2",
+    "8_3",
+    "8_4",
+    "8_6"
 ]

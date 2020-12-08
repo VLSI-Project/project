@@ -4,7 +4,7 @@ module lut3(
 
    input shift_clk, 
    input shift_i, 
-   output reg shift_o, 
+   output shift_o, 
    
    input a, 
    input b, 
@@ -27,11 +27,9 @@ module lut3(
      store[1] = store[0];
      store[0] = shift_i; 
      
-   shift_o = store[7];
-   
-   
    end 
-   
+
+   assign shift_o = store[7];
    
    always @(*) begin
    

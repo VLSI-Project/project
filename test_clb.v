@@ -1,15 +1,16 @@
+`timescale 1ns/1ps
 `include "defs.v"
-`default_nettype none
 
 module test_clb;
   
   parameter SHIFT_W = `CLB_CONFIG_LEN + 2*(`LUT_CONFIG_LEN);
-  reg shift_i, shift_clk;
+  reg shift_i, shift_clk, shift_en;
   reg a, b, c, d, k;
   wire x, y, shift_o;
 
   clb clb1(
       .shift_clk(shift_clk),
+      .shift_en(shift_en),
       .shift_i(shift_i),
       .shift_o(shift_o),
       .a(a),
@@ -35,8 +36,10 @@ module test_clb;
     input [SHIFT_W-1:0] val);
     integer i;
     begin
+      shift_en = 1;
       for(i = 0; i < SHIFT_W; i=i+1)
         shift_bit(val[i]);
+      shift_en = 0;
     end
   endtask
 
@@ -60,11 +63,11 @@ module test_clb;
         {a,b,c,d} = i;
         #10;
         if((x !== x_expected[i] || y !== y_expected[i]) && !seq) begin
-          $display("Test failed: bits=%36b, abcd=%4b, y=%b (expected y=%b), x=%b (expected x=%b)", val, i, y, y_expected[i], x, x_expected[i]);
+          $display("Test failed: bits=%38b, abcd=%4b, y=%b (expected y=%b), x=%b (expected x=%b)", val, {a,b,c,d}, y, y_expected[i], x, x_expected[i]);
           //$finish;
         end 
         else begin
-          $display("Test passed! abcd=%4b, x=%b, y=%b", i, x, y);
+          $display("Test passed! abcd=%4b, x=%b, y=%b", {a,b,c,d}, x, y);
         end
       end
     end
@@ -79,7 +82,7 @@ module test_clb;
      *  AND(A,B,C) on 'x' and XOR(B C D) on 'y' 
      *  */
     $display("XOR/AND test:");
-    test({1'b0, 3'b000, 3'b111, 1'b0, 8'b00000000, 2'b00, 2'b10, `AND3_CFG, `XOR3_CFG},
+    test({4'b0000, 4'b1110, 1'b0, 9'b000000000, 2'b00, 2'b10, `AND3_CFG, `XOR3_CFG},
         {16'b1100000000000000},
         {`XOR3_REV_CFG, `XOR3_REV_CFG}, 0);
     
@@ -88,7 +91,7 @@ module test_clb;
      */ 
     $display("\nMAJ4 test");
     #100
-    test({1'b0, 3'b011, 3'b011, 1'b1, 8'b00000000, 2'b10, 2'b01, `MAJ3_CFG, `MAJ3_CFG_B},
+    test({4'b0110, 4'b0110, 1'b1, 9'b000000000, 2'b10, 2'b01, `MAJ3_CFG, `MAJ3_CFG_B},
         {16'b1111111011101000},
         {16'b1111111011101000}, 0);
 
@@ -100,7 +103,7 @@ module test_clb;
     */ 
     $display("\nSequential test");
     #100
-    test({1'b1, 3'b111, 3'b001, 1'b0, 8'b01011000, 2'b10, 2'b00, 8'b01101001, 8'b00010001},
+    test({4'b1101, 4'b0001, 1'b0, 9'b010110000, 2'b10, 2'b00, 8'b01101001, 8'b00010001},
         {16'b1111000011010000},
         {16'b1111111111010111}, 0);
     

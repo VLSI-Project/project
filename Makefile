@@ -1,16 +1,27 @@
-SRCS := $(wildcard *.v)
+SRCS := $(wildcard *.v) $(wildcard rtl/*.v)
 
-TOP := test_lut3
+TOP := test_top
+
+SIM := iverilog
+ifeq ($(SIM),vcs)
+TARGET := simv
+BUILDCMD := vcs -full64 -top $(TOP)
+RUNCMD := ./$(TARGET) -q
+else ifeq ($(SIM),iverilog)
+TARGET := $(TOP)
+BUILDCMD := iverilog -Wall -o $(TARGET) -s $(TOP)
+RUNCMD := ./$(TARGET)
+endif
 
 .PHONY: all run clean
 
-all: simv
+all: $(TARGET)
 
-simv: $(SRCS)
-	vcs -full64 -top $(TOP) $(SRCS)
+$(TARGET): $(SRCS)
+	$(BUILDCMD) $(SRCS)
 
-run: simv
-	./simv -q
+run: $(TARGET)
+	$(RUNCMD)
 
 clean:
-	@rm -rf simv ucli.key simv.daidir/ csrc/ *.vcd
+	@rm -rf $(TARGET) ucli.key simv.daidir/ csrc/ *.vcd

@@ -2,6 +2,7 @@
 
 module pip(
   input  shift_clk,
+  input  shift_en,
   input  shift_i,
   output shift_o,
 
@@ -13,7 +14,7 @@ module pip(
   always @(posedge shift_clk)
     data <= {data[0],shift_i};
 
-  assign a = data[0] ? b : 1'bz;
-  assign b = data[1] ? a : 1'bz;
+  assign a = (data[0] && !shift_en) ? b : 1'bz;
+  assign b = (data[1] && !shift_en) ? a : 1'bz;
 
 endmodule

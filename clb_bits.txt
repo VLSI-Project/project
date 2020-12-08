@@ -1,0 +1,21 @@
+    0: LUT0 A/B input mux
+    1: LUT0 B/C input mux
+  2-3: LUT0 C/D/Q input mux
+
+    4: LUT1 A/B input mux
+    5: LUT1 B/C input mux
+  6-7: LUT1 C/D/Q input mux
+
+    8: FG output mux
+
+ 9-10: CLKMUX
+11-12: FLOP.EN + FLOP.INV_CLK
+13-14: SETMUX + FLOP.EN_SET
+15-16: RSTMUX + FLOP.EN_RST
+   17: FLOP.LATCH
+
+18-19: XMUX
+20-21: YMUX
+
+22-29: LUT0
+30-37: LUT1

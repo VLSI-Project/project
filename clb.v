@@ -1,14 +1,14 @@
 `timescale 1ns/1ps
 `include "defs.v"
-`default_nettype none
 
 /* CONFIG SHIFT REGISTER ORDER
- *shift_i -> Comb.LUT Muxes -> CLB Muxes -> Flop -> LUT0 -> LUT1 -> shift_o 
+ *shift_i -> Comb.LUT Muxes -> CLB Muxes -> LUT0 -> LUT1 -> shift_o
  */
 
 // configurable logic block
 module clb(
   input  shift_clk,
+  input  shift_en,
   input  shift_i,
   output shift_o,
 
@@ -21,9 +21,8 @@ module clb(
   output y);
 
   // CLB signals
-  wire flop_to_lut0, lut0_to_lut1;
-  wire d_comb;
-  wire q;
+  wire lut0_to_lut1;
+  wire latch_q, ff_q, q;
 
   // connections for shift register
   reg[`CLB_CONFIG_LEN-1:0] shift_reg;
@@ -31,24 +30,16 @@ module clb(
   reg init;
 
   always @(posedge shift_clk) begin
-    shift_reg = ((shift_reg << 1) | shift_i);       
+    shift_reg <= ((shift_reg << 1) | shift_i);
   end
 
   assign shift_reg_out = shift_reg[`CLB_CONFIG_LEN-1];
-
-  // Mux for D and Q 
-  mux2 dq_mux(
-    .sel(shift_reg[0]),
-    .a(d),
-    .b(q),
-    .mux_out(d_comb)); 
-
 
   // LUTs
   wire lut0_a, lut0_b, lut0_c, l0_f;
   lut3 lut0(
     .shift_clk(shift_clk),
-    .shift_i(flop_to_lut0),
+    .shift_i(shift_reg_out),
     .shift_o(lut0_to_lut1),
 
     .a(lut0_a),
@@ -58,21 +49,22 @@ module clb(
 
   // logic to generate lut0_a/b/c
   mux2 lut0_a_mux(
-    .sel(shift_reg[1]),
+    .sel(shift_reg[0]),
     .a(a),
     .b(b),
     .mux_out(lut0_a)); 
 
   mux2 lut0_b_mux(
-    .sel(shift_reg[2]),
+    .sel(shift_reg[1]),
     .a(b),
     .b(c),
     .mux_out(lut0_b)); 
 
-  mux2 lut0_c_mux(
-    .sel(shift_reg[3]),
+  mux3 lut0_c_mux(
+    .sel(shift_reg[3:2]),
     .a(c),
-    .b(d_comb),
+    .b(d),
+    .c(q),
     .mux_out(lut0_c));
   //
 
@@ -101,10 +93,11 @@ module clb(
     .b(c),
     .mux_out(lut1_b)); 
 
-  mux2 lut1_c_mux(
-    .sel(shift_reg[6]),
+  mux3 lut1_c_mux(
+    .sel(shift_reg[7:6]),
     .a(c),
-    .b(d_comb),
+    .b(d),
+    .c(q),
     .mux_out(lut1_c));
   
   wire dynamic_out, f, g;
@@ -116,13 +109,13 @@ module clb(
     .mux_out(dynamic_out)); 
 
   mux2 f_mux(
-    .sel(shift_reg[7]),
+    .sel(shift_reg[8]),
     .a(l0_f),
     .b(dynamic_out),
     .mux_out(f));
  
   mux2 g_mux(
-    .sel(shift_reg[7]),
+    .sel(shift_reg[8]),
     .a(l1_g),
     .b(dynamic_out),
     .mux_out(g)); 
@@ -132,55 +125,61 @@ module clb(
   wire clk_s1_out, flop_clk, flop_set, flop_rst;
   flop flop(
     .shift_clk(shift_clk),
-    .shift_i(shift_reg_out),
-    .shift_o(flop_to_lut0),
+    .shift_en(shift_en),
 
     .flop_clk(flop_clk),
     .set(flop_set),
     .rst(flop_rst),
  
     .d(f),
-    .q(q));
+    .latch_q(latch_q),
+    .ff_q(ff_q));
 
   // logic to generate flop_clk/set/rst
   mux3 clk_mux_s1(
-    .sel(shift_reg[9:8]),
+    .sel(shift_reg[10:9]),
     .a(g),
     .b(c),
     .c(k),
     .mux_out(clk_s1_out));  
  
   mux3 clk_mux_s2(
-    .sel(shift_reg[11:10]),
+    .sel(shift_reg[12:11]),
     .a(1'b0),
     .b(!clk_s1_out),
     .c(clk_s1_out),
     .mux_out(flop_clk));  
 
   mux3 set_mux(
-    .sel(shift_reg[13:12]),
+    .sel(shift_reg[14:13]),
     .a(1'b0),
     .b(a),
     .c(f),
     .mux_out(flop_set));
 
   mux3 rst_mux(
-    .sel(shift_reg[15:14]),
+    .sel(shift_reg[16:15]),
     .a(1'b0),
     .b(d),
     .c(g),
     .mux_out(flop_rst));
 
-  // logic to generate x/y 
+  mux2 q_mux(
+    .sel(shift_reg[17]),
+    .a(ff_q),
+    .b(latch_q),
+    .mux_out(q));
+
+  // logic to generate x/y
   mux3 x_mux(
-    .sel(shift_reg[17:16]),
+    .sel(shift_reg[19:18]),
     .a(f),
     .b(g),
     .c(q),
     .mux_out(x));
 
   mux3 y_mux(
-    .sel(shift_reg[19:18]),
+    .sel(shift_reg[21:20]),
     .a(q),
     .b(g),
     .c(f),

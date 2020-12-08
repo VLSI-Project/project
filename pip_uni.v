@@ -2,6 +2,7 @@
 
 module pip_uni(
   input  shift_clk,
+  input  shift_en,
   input  shift_i,
   output shift_o,
 
@@ -13,6 +14,6 @@ module pip_uni(
   always @(posedge shift_clk)
     data <= shift_i;
 
-  assign b = data ? a : 1'bz;
+  assign b = (data && !shift_en) ? a : 1'bz;
 
 endmodule

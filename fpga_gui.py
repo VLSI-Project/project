@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
 import tkinter as tk
+import io
 from defines import *
 import sys
 
 SCALE = 2
+
+XSPACE = 93.75
+YSPACE = 94
 
 class CfgVar(tk.IntVar):
     def __init__(self, name: str, width: int, value: int):
@@ -14,11 +18,11 @@ class CfgVar(tk.IntVar):
         self.fmt = "0" + str(width) + "b"
         self.set(value)
     def writeBits(self, bitfile):
-        bitfile.write(format(self.get(), self.fmt))
+        bitfile.write(format(self.get(), self.fmt)[::-1])
     def readBits(self, bitfile):
-        self.set(int(bitfile.read(self.width), 2))
+        self.set(int(bitfile.read(self.width)[::-1], 2))
     def writeCfg(self, prefix: str, cfgfile):
-        cfgfile.write("{}{} = {}\n".format(prefix, self.name, self.get()))
+        cfgfile.write("{}{} = {}\n".format(prefix, self.name, format(self.get(), self.fmt)[::-1]))
 
 class Module:
     def __init__(self, name: str, canvas: tk.Canvas, x: int, y: int, width: int, height: int, scale: int = SCALE):
@@ -51,6 +55,35 @@ class Module:
             cfgVar.writeCfg(prefix, cfgfile)
         for child in self.children:
             child.writeCfg(prefix, cfgfile)
+    def getCfgVar(self, path: str):
+        idx = path.find(".")
+        name = path
+        path = None
+        if idx != -1:
+            path = name[idx+1:]
+            name = name[:idx]
+            for child in self.children:
+                if child.name != name:
+                    continue
+                return child.getCfgVar(path)
+            return None
+        for cfgVar in self.cfgVars:
+            if cfgVar.name != name:
+                continue
+            return cfgVar
+        return None
+    def getChild(self, path: str):
+        idx = path.find(".")
+        name = path
+        path = None
+        if idx != -1:
+            path = name[idx+1:]
+            name = name[:idx]
+        for child in self.children:
+            if child.name != name:
+                continue
+            return child.getChild(path) if path else child
+        return None
     def show(self):
         for child in self.children:
             child.show()
@@ -69,7 +102,7 @@ class Mux(Module):
         super().__init__(name, canvas, x, y, 28, 56, scale)
         self.numInputs = numInputs
         self.spacing = (36*scale) / (numInputs - 1)
-        self.addCfgVar("SEL", numInputs.bit_length(), value)
+        self.addCfgVar("SEL", (numInputs-1).bit_length(), value)
         self.line = None
     def show(self):
         super().show()
@@ -93,7 +126,7 @@ class Mux(Module):
                            self.x + self.width,
                            self.y + (self.height / 2))
 
-class PIP(Module):
+class PIPUnidir(Module):
     def __init__(self, name: str, canvas: tk.Canvas, x: int, y: int):
         super().__init__(name, canvas, x, y, 4, 4)
         self.addCfgVar("EN", 1, 0)
@@ -116,26 +149,55 @@ class PIP(Module):
         state = self.cfgVars[0].get()
         fill = "green" if (state != 0) else "red"
         self.canvas.itemconfig(self.rect, fill=fill)
+    def writeCfg(self, prefix: str, cfgfile):
+        cfgfile.write("{}{} = {}\n".format(prefix, self.name, self.cfgVars[0].get()))
 
-class PIPGroup:
-    def __init__(self, name: str):
-        self.name = name
-        self.pips = []
-        self.ignore = False
-    def addPip(self, pip: PIP):
-        self.pips.append(pip)
-        pip.cfgVars[0].trace("w", self.onWrite)
-    def onWrite(self, varName, *args):
-        if self.ignore:
+class PIPBidir(Module):
+    def __init__(self, name: str, canvas: tk.Canvas, x: int, y: int):
+        super().__init__(name, canvas, x, y, 4, 4)
+        self.addCfgVar("EN", 2, 0)
+        self.cfgVars[0].trace("w", lambda *_: self.updateRect())
+        self.rect = None
+        self.horLine = None
+        self.vertLine = None
+    def show(self):
+        super().show()
+        self.rect = self.canvas.create_rectangle(self.x, self.y, self.x+(3*self.scale), self.y+(3*self.scale), fill="red")
+        self.horLine = self.canvas.create_line(self.x-self.scale, self.y+(2*self.scale), self.x+(5*self.scale), self.y+(2*self.scale), fill="green", width=2*self.scale)
+        self.vertLine = self.canvas.create_line(self.x+(2*self.scale), self.y-self.scale, self.x+(2*self.scale), self.y+(5*self.scale), fill="green", width=2*self.scale)
+        self.updateRect()
+    def hide(self):
+        super().hide()
+        self.canvas.delete(self.rect)
+        self.canvas.delete(self.horLine)
+        self.canvas.delete(self.vertLine)
+        self.rect = None
+        self.horLine = None
+        self.vertLine = None
+    def onClick(self):
+        stateNext = self.cfgVars[0].get() + 1
+        if stateNext == 3:
+            stateNext = 0
+        self.cfgVars[0].set(stateNext)
+        self.updateRect()
+    def updateRect(self):
+        if not self.rect:
             return
-        self.ignore = True
-        for pip in self.pips:
-            if str(pip.cfgVars[0]) == varName:
-                continue
-            if pip.cfgVars[0].get() != 0:
-                pip.cfgVars[0].set(0)
-        self.ignore = False
-
+        state = self.cfgVars[0].get()
+        if state == 0:
+            self.canvas.itemconfig(self.rect, state="normal")
+            self.canvas.itemconfig(self.horLine, state="hidden")
+            self.canvas.itemconfig(self.vertLine, state="hidden")
+        elif state == 1:
+            self.canvas.itemconfig(self.rect, state="hidden")
+            self.canvas.itemconfig(self.horLine, state="normal")
+            self.canvas.itemconfig(self.vertLine, state="hidden")
+        else:
+            self.canvas.itemconfig(self.rect, state="hidden")
+            self.canvas.itemconfig(self.horLine, state="hidden")
+            self.canvas.itemconfig(self.vertLine, state="normal")
+    def writeCfg(self, prefix: str, cfgfile):
+        cfgfile.write("{}{} = {}\n".format(prefix, self.name, format(self.cfgVars[0].get(), "02b")[::-1]))
 
 class Switch(Module):
     def __init__(self, name: str, canvas: tk.Canvas, x: int, y: int, frame: "SwitchFrame", sides: str = "NESW"):
@@ -145,63 +207,85 @@ class Switch(Module):
         if "N" in sides:
             if "E" in sides:
                 self.addCfgVar("1_3", 1, 0)
+                self.addCfgVar("3_1", 1, 0)
                 self.addCfgVar("2_3", 1, 0)
+                self.addCfgVar("3_2", 1, 0)
                 self.addCfgVar("2_4", 1, 0)
+                self.addCfgVar("4_2", 1, 0)
             if "S" in sides:
                 self.addCfgVar("1_5", 1, 0)
+                self.addCfgVar("5_1", 1, 0)
                 self.addCfgVar("1_6", 1, 0)
+                self.addCfgVar("6_1", 1, 0)
                 self.addCfgVar("2_5", 1, 0)
+                self.addCfgVar("5_2", 1, 0)
                 self.addCfgVar("2_6", 1, 0)
+                self.addCfgVar("6_2", 1, 0)
             if "W" in sides:
                 self.addCfgVar("1_7", 1, 0)
+                self.addCfgVar("7_1", 1, 0)
                 self.addCfgVar("1_8", 1, 0)
+                self.addCfgVar("8_1", 1, 0)
                 self.addCfgVar("2_8", 1, 0)
+                self.addCfgVar("8_2", 1, 0)
         if "E" in sides:
             if "S" in sides:
                 self.addCfgVar("3_5", 1, 0)
+                self.addCfgVar("5_3", 1, 0)
                 self.addCfgVar("4_5", 1, 0)
+                self.addCfgVar("5_4", 1, 0)
                 self.addCfgVar("4_6", 1, 0)
+                self.addCfgVar("6_4", 1, 0)
             if "W" in sides:
                 self.addCfgVar("3_7", 1, 0)
+                self.addCfgVar("7_3", 1, 0)
                 self.addCfgVar("3_8", 1, 0)
+                self.addCfgVar("8_3", 1, 0)
                 self.addCfgVar("4_7", 1, 0)
+                self.addCfgVar("7_4", 1, 0)
                 self.addCfgVar("4_8", 1, 0)
+                self.addCfgVar("8_4", 1, 0)
         if "S" in sides and "W" in sides:
             self.addCfgVar("5_7", 1, 0)
+            self.addCfgVar("7_5", 1, 0)
             self.addCfgVar("6_7", 1, 0)
+            self.addCfgVar("7_6", 1, 0)
             self.addCfgVar("6_8", 1, 0)
+            self.addCfgVar("8_6", 1, 0)
     def onClick(self):
         self.frame.showSwitch(self)
+    def writeBits(self, bitfile):
+        for conn in SWITCH_CONNS:
+            cfgVar = self.getCfgVar(conn)
+            if cfgVar:
+                cfgVar.writeBits(bitfile)
+            else:
+                bitfile.write("0")
+    def readBits(self, bitfile):
+        for conn in SWITCH_CONNS:
+            cfgVar = self.getCfgVar(conn)
+            if cfgVar:
+                cfgVar.readBits(bitfile)
+            else:
+                bitfile.read(1)
+    def writeCfg(self, prefix: str, cfgfile):
+        bits = io.StringIO()
+        self.writeBits(bits)
+        cfgfile.write("{}{} = {}\n".format(prefix, self.name, bits.getvalue()))
 
 class SwitchFrame(tk.Toplevel):
     def __init__(self, master=None):
         super().__init__(master)
         self.switch = None
         self.checkboxes = []
-        self.addCheckbox("1_3")
-        self.addCheckbox("1_5")
-        self.addCheckbox("1_6")
-        self.addCheckbox("1_7")
-        self.addCheckbox("1_8")
-        self.addCheckbox("2_3")
-        self.addCheckbox("2_4")
-        self.addCheckbox("2_5")
-        self.addCheckbox("2_6")
-        self.addCheckbox("2_8")
-        self.addCheckbox("3_5")
-        self.addCheckbox("3_7")
-        self.addCheckbox("3_8")
-        self.addCheckbox("4_5")
-        self.addCheckbox("4_6")
-        self.addCheckbox("4_7")
-        self.addCheckbox("4_8")
-        self.addCheckbox("5_7")
-        self.addCheckbox("6_7")
-        self.addCheckbox("6_8")
+        for conn in SWITCH_CONNS:
+            self.addCheckbox(conn)
         self.protocol("WM_DELETE_WINDOW", self.onClose);
     def addCheckbox(self, name: str):
+        col = int(name[0]) - 1
+        row = int(name[2]) - 1
         checkbox = tk.Checkbutton(self, text=name)
-        checkbox.grid(sticky=tk.W)
+        checkbox.grid(row=row, column=col, sticky=tk.W)
         self.checkboxes.append(checkbox)
     def onClose(self):
         self.switch.hide()
@@ -304,15 +388,14 @@ class LUT4(Module):
         self.addChild(Mux("INMUX3", lut4Frame.canvas, 133, 394, 2, 0, 1))
         self.addChild(Mux("INMUX4", lut4Frame.canvas, 133, 463, 2, 0, 1))
         self.addChild(Mux("INMUX5", lut4Frame.canvas, 133, 539, 3, 0, 1))
-        self.addChild(Mux("FMUX", lut4Frame.canvas, 555, 199, 2, 0, 1))
-        self.addChild(Mux("GMUX", lut4Frame.canvas, 555, 469, 2, 0, 1))
+        self.addChild(Mux("FGMUX", lut4Frame.canvas, 555, 199, 2, 0, 1))
         self.addChild(LUT3("LUT0", lut4Frame.canvas, 201, 119, lut3Frame))
         self.addChild(LUT3("LUT1", lut4Frame.canvas, 201, 392, lut3Frame))
     def show(self):
-        for i in range(8):
+        for i in range(7):
             self.children[i].show()
     def hide(self):
-        for i in range(8):
+        for i in range(7):
             self.children[i].hide()
     def onClick(self):
         self.frame.showLUT4(self)
@@ -362,6 +445,84 @@ class CLB(Module):
             self.children[i].hide()
     def onClick(self):
         self.frame.showCLB(self)
+    def writeBits(self, bitfile):
+        for i in range(6):
+            self.getCfgVar("LUT4.INMUX{}.SEL".format(i)).writeBits(bitfile)
+        self.getCfgVar("LUT4.FGMUX.SEL").writeBits(bitfile)
+        self.getCfgVar("CLKMUX.SEL").writeBits(bitfile)
+        # Encode EN and INV_CLK
+        if self.getCfgVar("FLOP.EN").get() == 0:
+            bitfile.write("00")
+        elif self.getCfgVar("FLOP.INV_CLK").get() == 0:
+            bitfile.write("01")
+        else:
+            bitfile.write("10")
+        # Encode EN_SET and SETMUX
+        if self.getCfgVar("FLOP.EN_SET").get() == 0:
+            bitfile.write("00")
+        elif self.getCfgVar("SETMUX.SEL").get() == 0:
+            bitfile.write("10")
+        else:
+            bitfile.write("01")
+        # Encode EN_RST and RSTMUX
+        if self.getCfgVar("FLOP.EN_RST").get() == 0:
+            bitfile.write("00")
+        elif self.getCfgVar("RSTMUX.SEL").get() == 0:
+            bitfile.write("10")
+        else:
+            bitfile.write("01")
+        self.getCfgVar("FLOP.LATCH").writeBits(bitfile)
+        self.getCfgVar("XMUX.SEL").writeBits(bitfile)
+        self.getCfgVar("YMUX.SEL").writeBits(bitfile)
+        self.getChild("LUT4.LUT0").writeBits(bitfile)
+        self.getChild("LUT4.LUT1").writeBits(bitfile)
+    def readBits(self, bitfile):
+        for i in range(6):
+            self.getCfgVar("LUT4.INMUX{}.SEL".format(i)).readBits(bitfile)
+        self.getCfgVar("LUT4.FGMUX.SEL").readBits(bitfile)
+        self.getCfgVar("CLKMUX.SEL").readBits(bitfile)
+        # Decode EN and INV_CLK
+        bits = bitfile.read(2)
+        if bits == "00" or bits == "11":
+            self.getCfgVar("FLOP.EN").set(0)
+            self.getCfgVar("FLOP.INV_CLK").set(0)
+        elif bits == "10":
+            self.getCfgVar("FLOP.EN").set(1)
+            self.getCfgVar("FLOP.INV_CLK").set(1)
+        else:
+            self.getCfgVar("FLOP.EN").set(1)
+            self.getCfgVar("FLOP.INV_CLK").set(0)
+        # Encode EN_SET and SETMUX
+        bits = bitfile.read(2)
+        if bits == "00" or bits == "11":
+            self.getCfgVar("FLOP.EN_SET").set(0)
+            self.getCfgVar("SETMUX.SEL").set(0)
+        elif bits == "10":
+            self.getCfgVar("FLOP.EN_SET").set(1)
+            self.getCfgVar("SETMUX.SEL").set(0)
+        else:
+            self.getCfgVar("FLOP.EN_EST").set(1)
+            self.getCfgVar("SETMUX.SEL").set(1)
+        # Encode EN_RST and RSTMUX
+        bits = bitfile.read(2)
+        if bits == "00" or bits == "11":
+            self.getCfgVar("FLOP.EN_RST").set(0)
+            self.getCfgVar("RSTMUX.SEL").set(0)
+        elif bits == "10":
+            self.getCfgVar("FLOP.EN_RST").set(1)
+            self.getCfgVar("RSTMUX.SEL").set(0)
+        else:
+            self.getCfgVar("FLOP.EN_RST").set(1)
+            self.getCfgVar("RSTMUX.SEL").set(1)
+        self.getCfgVar("FLOP.LATCH").readBits(bitfile)
+        self.getCfgVar("XMUX.SEL").readBits(bitfile)
+        self.getCfgVar("YMUX.SEL").readBits(bitfile)
+        self.getChild("LUT4.LUT0").readBits(bitfile)
+        self.getChild("LUT4.LUT1").readBits(bitfile)
+    def writeCfg(self, prefix: str, cfgfile):
+        bitfile = io.StringIO()
+        self.writeBits(bitfile)
+        cfgfile.write("{}{} = {}\n".format(prefix, self.name, bitfile.getvalue()))
 
 class CLBFrame(tk.Toplevel):
     def __init__(self, master=None):
@@ -401,6 +562,10 @@ class IOB(Module):
         self.addCfgVar("FLOP", 1, 0)
     def onClick(self):
         self.frame.showIOB(self)
+    def writeCfg(self, prefix: str, cfgfile):
+        bits = io.StringIO()
+        self.writeBits(bits)
+        cfgfile.write("{}{} = {}\n".format(prefix, self.name, bits.getvalue()))
 
 class IOBFrame(tk.Toplevel):
     def __init__(self, master=None):
@@ -445,80 +610,79 @@ class FPGA(Module):
         self.lut3Frame = LUT3Frame()
         self.lut3Frame.withdraw()
         self.numPips = 0
-        # self.pipGroups = []
         for x in range(8):
             for y in range(8):
-                clbx = 107 + int(x * 93.75)
-                clby = 97 + (y * 94)
+                clbx = 107 + int(x * XSPACE)
+                clby = 97 + int(y * YSPACE)
                 clbName = chr(0x41+y) + chr(0x41+x)
                 self.addChild(CLB("CLB_" + clbName, canvas, clbx, clby, self.clbFrame, self.flopFrame, self.lut4Frame, self.lut3Frame))
                 pipName = "PIP_"+clbName
                 if y > 0:
-                    self.addPips(pipName+"_A", clbx, clby, CLB_PIP_A)
+                    self.addPips(pipName+"_A", clbx, clby, CLB_PIP_A, True)
                 else:
-                    self.addPips(pipName+"_A", clbx, clby, CLB_TOP_PIP_A)
+                    self.addPips(pipName+"_A", clbx, clby, CLB_TOP_PIP_A, True)
                 if x > 0:
-                    self.addPips(pipName+"_B", clbx, clby, CLB_PIP_B)
-                    self.addPips(pipName+"_C", clbx, clby, CLB_PIP_C)
-                    self.addPips(pipName+"_K", clbx, clby, CLB_PIP_K)
+                    self.addPips(pipName+"_B", clbx, clby, CLB_PIP_B, True)
+                    self.addPips(pipName+"_C", clbx, clby, CLB_PIP_C, True)
+                    self.addPips(pipName+"_K", clbx, clby, CLB_PIP_K, True)
                 else:
-                    self.addPips(pipName+"_B", clbx, clby, CLB_LEFT_PIP_B)
-                    self.addPips(pipName+"_C", clbx, clby, CLB_LEFT_PIP_C)
-                    self.addPips(pipName+"_K", clbx, clby, CLB_LEFT_PIP_K)
+                    self.addPips(pipName+"_B", clbx, clby, CLB_LEFT_PIP_B, True)
+                    self.addPips(pipName+"_C", clbx, clby, CLB_LEFT_PIP_C, True)
+                    self.addPips(pipName+"_K", clbx, clby, CLB_LEFT_PIP_K, True)
                 if y < 7:
-                    self.addPips(pipName+"_D", clbx, clby, CLB_PIP_D)
+                    self.addPips(pipName+"_D", clbx, clby, CLB_PIP_D, True)
                 else:
-                    self.addPips(pipName+"_D", clbx, clby, CLB_BOT_PIP_D)
+                    self.addPips(pipName+"_D", clbx, clby, CLB_BOT_PIP_D, True)
                 if x < 7:
-                    self.addPips(pipName+"_X", clbx, clby, CLB_PIP_X)
-                    self.addPips(pipName+"_Y", clbx, clby, CLB_PIP_Y)
+                    self.addPips(pipName+"_X", clbx, clby, CLB_PIP_X, True)
+                    self.addPips(pipName+"_Y", clbx, clby, CLB_PIP_Y, True)
                 elif clbName == "EH":
-                    self.addPips(pipName+"_X", clbx, clby, CLB_RIGHT_PIP_X, ["OUTHI"])
-                    self.addPips(pipName+"_Y", clbx, clby, CLB_RIGHT_PIP_Y, ["OUTHI"])
+                    self.addPips(pipName+"_X", clbx, clby, CLB_RIGHT_PIP_X, True, ["OUTHI"])
+                    self.addPips(pipName+"_Y", clbx, clby, CLB_RIGHT_PIP_Y, True, ["OUTHI"])
                 else:
-                    self.addPips(pipName+"_X", clbx, clby, CLB_RIGHT_PIP_X)
-                    self.addPips(pipName+"_Y", clbx, clby, CLB_RIGHT_PIP_Y)
+                    self.addPips(pipName+"_X", clbx, clby, CLB_RIGHT_PIP_X, True)
+                    self.addPips(pipName+"_Y", clbx, clby, CLB_RIGHT_PIP_Y, True)
         for x in range(7):
             for y in range(7):
-                switchx = 144 + int(x * 93.75)
-                switchy = 154 + (y * 94)
+                switchx = 144 + int(x * XSPACE)
+                switchy = 154 + int(y * YSPACE)
                 switchName = chr(0x41+y+1) + chr(0x41+x+1)
                 self.addChild(Switch("SW_"+switchName+"_0", canvas, switchx, switchy, self.switchFrame))
                 self.addChild(Switch("SW_"+switchName+"_1", canvas, switchx+11, switchy+11, self.switchFrame))
-                self.addPips("PIP_SW_"+switchName, switchx-1, switchy-1, SWITCH_PIP)
+                self.addPips("PIP_SW_"+switchName, switchx, switchy, SWITCH_PIP)
         for y in range(7):
             switchx = 37
-            switchy = 154 + (y * 94)
+            switchy = 154 + int(y * YSPACE)
             switchName = "LEFT" + str(y)
             self.addChild(Switch("SW_"+switchName+"_0", canvas, switchx, switchy, self.switchFrame, "NES"))
             self.addChild(Switch("SW_"+switchName+"_1", canvas, switchx+11, switchy+11, self.switchFrame, "NES"))
-            self.addPips("PIP_SW_"+switchName, switchx-1, switchy-1, SWITCH_LEFT_PIP)
+            self.addPips("PIP_SW_"+switchName, switchx, switchy, SWITCH_LEFT_PIP)
 
             switchx = 830
             switchName = "RIGHT" + str(y)
             self.addChild(Switch("SW_"+switchName+"_0", canvas, switchx, switchy, self.switchFrame, "NSW"))
             self.addChild(Switch("SW_"+switchName+"_1", canvas, switchx+11, switchy+11, self.switchFrame, "NSW"))
-            self.addPips("PIP_SW_"+switchName, switchx-1, switchy-1, SWITCH_RIGHT_PIP)
+            self.addPips("PIP_SW_"+switchName, switchx, switchy, SWITCH_RIGHT_PIP)
         for x in range(7):
-            switchx = 144 + int(x * 93.75)
+            switchx = 144 + int(x * XSPACE)
             switchy = 45
             switchName = "TOP" + str(x)
             self.addChild(Switch("SW_"+switchName+"_0", canvas, switchx, switchy, self.switchFrame, "ESW"))
             self.addChild(Switch("SW_"+switchName+"_1", canvas, switchx+11, switchy+11, self.switchFrame, "ESW"))
-            self.addPips("PIP_SW_"+switchName, switchx, switchy-1, SWITCH_TOP_PIP)
+            self.addPips("PIP_SW_"+switchName, switchx, switchy, SWITCH_TOP_PIP)
 
             switchy = 828
             switchName = "BOT" + str(x)
             self.addChild(Switch("SW_"+switchName+"_0", canvas, switchx+11, switchy, self.switchFrame, "NEW"))
             self.addChild(Switch("SW_"+switchName+"_1", canvas, switchx, switchy+11, self.switchFrame, "NEW"))
-            self.addPips("PIP_SW_"+switchName, switchx, switchy-1, SWITCH_BOT_PIP)
+            self.addPips("PIP_SW_"+switchName, switchx, switchy, SWITCH_BOT_PIP)
         for iob in LEFT_IOB:
             self.addChild(IOB("IOB_"+iob[2], canvas, iob[0], iob[1], False, self.iobFrame))
             if iob[2] in ["P11","P13","P15","P17","P19","P21","P23"]:
                 pips = IOB_LEFT_TOP_PIP
             else:
                 pips = IOB_LEFT_BOT_PIP
-            self.addPips("PIP_IOB_"+iob[2], iob[0], iob[1], pips)
+            self.addPips("PIP_IOB_"+iob[2], iob[0], iob[1], pips, True)
         for iob in TOP_IOB:
             self.addChild(IOB("IOB_"+iob[2], canvas, iob[0], iob[1], True, self.iobFrame))
             if iob[2] in ["P7","P5","P3","P68","P66","P64","P62"]:
@@ -529,14 +693,14 @@ class FPGA(Module):
                 pips = IOB_P61_PIP
             else:
                 pips = IOB_TOP_RIGHT_PIP
-            self.addPips("PIP_IOB_"+iob[2], iob[0], iob[1], pips)
+            self.addPips("PIP_IOB_"+iob[2], iob[0], iob[1], pips, True)
         for iob in RIGHT_IOB:
             self.addChild(IOB("IOB_"+iob[2], canvas, iob[0], iob[1], False, self.iobFrame))
             if iob[2] in ["P59","P57","P55","P53","P51","P49","P47"]:
                 pips = IOB_RIGHT_TOP_PIP
             else:
                 pips = IOB_RIGHT_BOT_PIP
-            self.addPips("PIP_IOB_"+iob[2], iob[0], iob[1], pips)
+            self.addPips("PIP_IOB_"+iob[2], iob[0], iob[1], pips, True)
         for iob in BOT_IOB:
             self.addChild(IOB("IOB_"+iob[2], canvas, iob[0], iob[1], True, self.iobFrame))
             if iob[2] in ["P29","P31","P33","P36","P38","P40","P42"]:
@@ -547,19 +711,21 @@ class FPGA(Module):
                 pips = IOB_P27_PIP
             else:
                 pips = IOB_BOT_RIGHT_PIP
-            self.addPips("PIP_IOB_"+iob[2], iob[0], iob[1], pips)
+            self.addPips("PIP_IOB_"+iob[2], iob[0], iob[1], pips, True)
         self.addPips("PIP_TOP_LEFT", 0, 0, TOP_LEFT_CORNER_PIP)
-        self.addPips("PIP_GLOBALIN", 0, 0, GLOBALIN_PIP)
+        self.addPips("PIP_GLOBALIN", 0, 0, GLOBALIN_PIP, True)
         self.addPips("PIP_TOP_RIGHT", 0, 0, TOP_RIGHT_CORNER_PIP)
         self.addPips("PIP_BOT_RIGHT", 0, 0, BOT_RIGHT_CORNER_PIP)
-        self.addPips("PIP_ALTIN", 0, 0, ALTIN_PIP)
+        self.addPips("PIP_ALTIN", 0, 0, ALTIN_PIP, True)
         self.addPips("PIP_BOT_LEFT", 0, 0, BOT_LEFT_CORNER_PIP)
-        print(self.numPips)
-    def addPips(self, groupName: str, clbx: int, clby: int, pipData: list, exclude: list = None):
+    def addPips(self, groupName: str, clbx: int, clby: int, pipData: list, unidir: bool = False, exclude: list = None):
         for pip in pipData:
             if exclude and pip[2] in exclude:
                 continue
-            pip = PIP(groupName+"_"+pip[2], self.canvas, clbx+pip[0], clby+pip[1])
+            if unidir:
+                pip = PIPUnidir(groupName+"_"+pip[2], self.canvas, clbx+pip[0], clby+pip[1])
+            else:
+                pip = PIPBidir(groupName+"_"+pip[2], self.canvas, clbx+pip[0], clby+pip[1])
             pip.show()
             self.addChild(pip)
             self.numPips += 1
@@ -589,13 +755,13 @@ class FPGAFrame(tk.Frame):
     def onDrag(self, event: tk.Event):
         self.canvas.scan_dragto(event.x, event.y, gain=1)
     def writeBits(self):
-        with open("bits.txt", "w") as f:
+        with open("gui_save.txt", "w") as f:
             self.fpga.writeBits(f)
-        print("Wrote bits")
+        print("Wrote save file")
     def readBits(self, filename: str):
         with open(filename, "r") as f:
             self.fpga.readBits(f)
-        print("Read bits")
+        print("Read save file")
     def writeCfg(self):
         with open("config.txt", "w") as f:
             self.fpga.writeCfg("", f)

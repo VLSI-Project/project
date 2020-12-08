@@ -54,6 +54,7 @@ class GenRTL:
 
 module {}(
   input shift_clk,
+  input shift_en,
   input shift_i,
   output shift_o""".format(moduleName))
     def port(self, port: str):
@@ -66,12 +67,14 @@ module {}(
 endmodule
 """.format(self.shiftIn))
         self.outfile.close()
-    def clb(self):
+    def clb(self, name: str):
         shiftOut = "shift"+str(self.shiftIndex)
-        self.w("""  wire {};
+        self.w("""  // {}
+  wire {};
   tri clb_a, clb_b, clb_c, clb_k;
   clb clb(
     .shift_clk(shift_clk),
+    .shift_en(shift_en),
     .shift_i({}),
     .shift_o({}),
     .a(clb_a),
@@ -82,19 +85,22 @@ endmodule
     .x(clb_x),
     .y(clb_y));
 
-""".format(shiftOut, self.shiftIn, shiftOut))
+""".format(name, shiftOut, self.shiftIn, shiftOut))
         self.shiftIndex += 1
         self.shiftIn = shiftOut
         self.numCLBs += 1
-    def switch(self, sides: str = "NESW"):
+    def switch(self, name: str, index: int, sides: str = "NESW"):
+        index *= 2
         north = 1 if ("N" in sides) else 0
         east = 1 if ("E" in sides) else 0
         south = 1 if ("S" in sides) else 0
         west = 1 if ("W" in sides) else 0
         shiftOut = "shift"+str(self.shiftIndex)
-        self.w("""  wire {};
+        self.w("""  // {}
+  wire {};
   switch #({},{},{},{}) switch{}(
     .shift_clk(shift_clk),
+    .shift_en(shift_en),
     .shift_i({}),
     .shift_o({}),
     .pin1({}),
@@ -106,17 +112,17 @@ endmodule
     .pin7({}),
     .pin8({}));
 
-""".format(shiftOut,
+""".format(name, shiftOut,
            north, east, south, west,
            self.shiftIndex, self.shiftIn, shiftOut,
-           "gen_col_top[0]" if north else "",
-           "gen_col_top[1]" if north else "",
-           "gen_row_right[1]" if east else "",
-           "gen_row_right[0]" if east else "",
-           "gen_col_bot[1]" if south else "",
-           "gen_col_bot[0]" if south else "",
-           "gen_row_left[0]" if west else "",
-           "gen_row_left[1]" if west else ""))
+           "gen_col_top[{}]".format(index) if north else "",
+           "gen_col_top[{}]".format(index+1) if north else "",
+           "gen_row_right[{}]".format(index+1) if east else "",
+           "gen_row_right[{}]".format(index) if east else "",
+           "gen_col_bot[{}]".format(index+1) if south else "",
+           "gen_col_bot[{}]".format(index) if south else "",
+           "gen_row_left[{}]".format(index) if west else "",
+           "gen_row_left[{}]".format(index+1) if west else ""))
         self.shiftIndex += 1
         self.shiftIn = shiftOut
         self.numSwitches += 1
@@ -126,6 +132,7 @@ endmodule
   wire {};
   pip{} pip{}(
     .shift_clk(shift_clk),
+    .shift_en(shift_en),
     .shift_i({}),
     .shift_o({}),
     .a({}),
@@ -135,11 +142,13 @@ endmodule
         self.shiftIndex += 1
         self.shiftIn = shiftOut
         self.numPIPs += 1
-    def iob(self, place: str, ioclk: str):
+    def iob(self, name: str, place: str, ioclk: str):
         shiftOut = "shift"+str(self.shiftIndex)
-        self.w("""  wire {};
+        self.w("""  // {}
+  wire {};
   iob iob_{}(
     .shift_clk(shift_clk),
+    .shift_en(shift_en),
     .shift_i({}),
     .shift_o({}),
     .io_clk({}),
@@ -148,7 +157,7 @@ endmodule
     .out(iob_out_{}),
     .pin(iob_pin_{}));
 
-""".format(shiftOut, place, self.shiftIn, shiftOut, ioclk, place, place, place, place))
+""".format(name, shiftOut, place, self.shiftIn, shiftOut, ioclk, place, place, place, place))
         self.shiftIndex += 1
         self.shiftIn = shiftOut
         self.numIOBs += 1
@@ -160,8 +169,14 @@ if __name__ == "__main__":
 
 module top(
   input shift_clk,
+  input shift_en,
   input shift_i,
-  output shift_o);
+  output shift_o,
+
+  inout tri [15:0] iob_pin_top,
+  inout tri [15:0] iob_pin_right,
+  inout tri [15:0] iob_pin_bot,
+  inout tri [15:0] iob_pin_left);
 
   wire [81:0] shift;
   tri  [3:0]  gen_row [0:71];
@@ -197,6 +212,7 @@ module top(
             gen.begin(tileName)
             top.write("""  {} {}(
     .shift_clk(shift_clk),
+    .shift_en(shift_en),
     .shift_i(shift[{}]),
     .shift_o(shift[{}]),
     .global_(global_)""".format(tileName, tileName, idx, idx+1))
@@ -284,6 +300,10 @@ module top(
                     top.write(",\n    .iob_out_right(top_iob_out[0])")
                     gen.port("input iob_in_bot")
                     top.write(",\n    .iob_in_bot(left_iob_in[0])")
+                    gen.port("inout tri iob_pin_mid")
+                    top.write(",\n    .iob_pin_mid(iob_pin_top[0])")
+                    gen.port("inout tri iob_pin_right")
+                    top.write(",\n    .iob_pin_right(iob_pin_top[1])")
                 elif y == 8:
                     gen.port("output tri ioclk_left")
                     top.write(",\n    .ioclk_left(ioclk_left)")
@@ -295,6 +315,10 @@ module top(
                     top.write(",\n    .iob_in_right(bot_iob_in[0])")
                     gen.port("input iob_out_right")
                     top.write(",\n    .iob_out_right(bot_iob_out[0])")
+                    gen.port("inout tri iob_pin_mid")
+                    top.write(",\n    .iob_pin_mid(iob_pin_bot[0])")
+                    gen.port("inout tri iob_pin_right")
+                    top.write(",\n    .iob_pin_right(iob_pin_bot[1])")
                 else:
                     gen.port("input ioclk_left")
                     top.write(",\n    .ioclk_left(ioclk_left)")
@@ -302,6 +326,11 @@ module top(
                     top.write(",\n    .iob_in_top(left_iob_in[{}])".format(y-1))
                     gen.port("input iob_in_bot")
                     top.write(",\n    .iob_in_bot(left_iob_in[{}])".format(y))
+                    gen.port("inout tri iob_pin_top")
+                    top.write(",\n    .iob_pin_top(iob_pin_left[{}])".format(y*2))
+                    if y != 4:
+                        gen.port("inout tri iob_pin_mid")
+                        top.write(",\n    .iob_pin_mid(iob_pin_left[{}])".format((y*2)+1))
             elif x == 8:
                 if y == 0:
                     gen.port("output tri ioclk_top")
@@ -331,6 +360,11 @@ module top(
                     if y == 7:
                         gen.port("output iob_in_mid")
                         top.write(",\n    .iob_in_mid(right_iob_in)")
+                    gen.port("inout tri iob_pin_top")
+                    top.write(",\n    .iob_pin_top(iob_pin_right[{}])".format(y*2))
+                    if y != 4:
+                        gen.port("inout tri iob_pin_mid")
+                        top.write(",\n    .iob_pin_mid(iob_pin_right[{}])".format((y*2)+1))
             else:
                 if y == 0:
                     gen.port("input ioclk_top")
@@ -343,6 +377,10 @@ module top(
                     top.write(",\n    .iob_in_left(top_iob_in[{}])".format(x-1))
                     gen.port("output iob_out_left")
                     top.write(",\n    .iob_out_left(top_iob_out[{}])".format(x-1))
+                    gen.port("inout tri iob_pin_mid")
+                    top.write(",\n    .iob_pin_mid(iob_pin_top[{}])".format(x*2))
+                    gen.port("inout tri iob_pin_right")
+                    top.write(",\n    .iob_pin_right(iob_pin_top[{}])".format((x*2)+1))
                 elif y == 8:
                     gen.port("input ioclk_bot")
                     top.write(",\n    .ioclk_bot(ioclk_bot)")
@@ -356,11 +394,15 @@ module top(
                     top.write(",\n    .iob_in_right(bot_iob_in[{}])".format(x))
                     gen.port("input iob_out_right")
                     top.write(",\n    .iob_out_right(bot_iob_out[{}])".format(x))
+                    gen.port("inout tri iob_pin_mid")
+                    top.write(",\n    .iob_pin_mid(iob_pin_bot[{}])".format(x*2))
+                    gen.port("inout tri iob_pin_right")
+                    top.write(",\n    .iob_pin_right(iob_pin_bot[{}])".format((x*2)+1))
             gen.endPorts()
             top.write(");\n\n")
 
             if x < 8 and y < 8:
-                gen.clb()
+                gen.clb("CLB_"+chr(0x41+y)+chr(0x41+x))
 
             if not ((x == 0 or x == 8) and (y == 0 or y == 8)):
                 sides = ""
@@ -372,12 +414,22 @@ module top(
                     sides += "S"
                 if x > 0:
                     sides += "W"
-                gen.switch(sides)
+                switchName = chr(0x41+y) + chr(0x41+x)
+                if x == 0:
+                    switchName = "LEFT" + str(y-1)
+                if x == 8:
+                    switchName = "RIGHT" + str(y-1)
+                if y == 0:
+                    switchName = "TOP" + str(x-1)
+                if y == 8:
+                    switchName = "BOT" + str(x-1)
+                gen.switch("SW_"+switchName+"_0", 0, sides)
+                gen.switch("SW_"+switchName+"_1", 1, sides)
 
             if y == 0 and x < 8:
                 iobNames = IOB_NAMES[(x,y)]
-                gen.iob("mid", "ioclk_top")
-                gen.iob("right", "ioclk_top")
+                gen.iob("IOB_"+iobNames[0], "mid", "ioclk_top")
+                gen.iob("IOB_"+iobNames[1], "right", "ioclk_top")
                 pipName = "PIP_IOB_"+iobNames[0]+"_"
                 if x > 0:
                     for pip in IOB_TOP_LEFT_PIP:
@@ -409,8 +461,8 @@ module top(
             if x == 8 and y > 0 and y < 8:
                 iobNames = IOB_NAMES[(x,y)]
                 if y != 4:
-                    gen.iob("mid", "ioclk_right")
-                gen.iob("top", "ioclk_right")
+                    gen.iob("IOB_"+iobNames[1], "mid", "ioclk_right")
+                gen.iob("IOB_"+iobNames[0], "top", "ioclk_right")
                 pipName = "PIP_IOB_"+iobNames[0]+"_"
                 for pip in IOB_RIGHT_TOP_PIP:
                     gen.pip(pipName+pip[2], pip[3], pip[4], True)
@@ -420,8 +472,8 @@ module top(
                         gen.pip(pipName+pip[2], pip[3], pip[4], True)
             if y == 8 and x < 8:
                 iobNames = IOB_NAMES[(x,y)]
-                gen.iob("mid", "ioclk_bot")
-                gen.iob("right", "ioclk_bot")
+                gen.iob("IOB_"+iobNames[0], "mid", "ioclk_bot")
+                gen.iob("IOB_"+iobNames[1], "right", "ioclk_bot")
                 pipName = "PIP_IOB_"+iobNames[0]+"_"
                 if x > 0:
                     for pip in IOB_BOT_LEFT_PIP:
@@ -449,8 +501,8 @@ module top(
             if x == 0 and y > 0 and y < 8:
                 iobNames = IOB_NAMES[(x,y)]
                 if y != 4:
-                    gen.iob("mid", "ioclk_left")
-                gen.iob("top", "ioclk_left")
+                    gen.iob("IOB_"+iobNames[1], "mid", "ioclk_left")
+                gen.iob("IOB_"+iobNames[0], "top", "ioclk_left")
                 pipName = "PIP_IOB_"+iobNames[0]+"_"
                 for pip in IOB_LEFT_TOP_PIP:
                     gen.pip(pipName+pip[2], pip[3], pip[4], True)
